@@ -6,16 +6,137 @@
 		<meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=yes" />
 		
 		<title>Simple jQuery Soundcloud Player - URLxyz.com</title>
-
-		<!-- Custom style Soundcloud Player -->
-		<link type="text/css" rel="stylesheet" href="scp.css" />
 		
 		<!-- Demo -->
 		<style>
-			body {
-				background: #fff;
-				padding: 50px 10px;
-			}
+body {
+	background: #fff;
+	padding: 50px 10px;
+}
+#scp {
+	font-family: sans-serif;
+	font-size: 1em;
+	color: #444;
+	display: block;
+	background: #000
+}
+
+#scp-input, #scp-select {
+	border: none;
+	outline:0px;
+	padding: 5px;
+	color: #fff;
+	background: #000
+}
+
+#scp-input {
+	border-right: 1px solid #333;
+	float: left;
+	width: 55%
+}
+
+#scp-select {
+	width: 20%
+}
+
+#scp-search {
+	cursor: pointer;
+	margin-left: 10px;
+	padding: 5px 10px 5px 10px;
+	color: #fff;
+	background: #ff3a00;
+	border: none;
+	width: 15%
+}
+
+.scp-unit {
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
+	vertical-align: top;
+	overflow: hidden;
+	*overflow: visible;
+}
+
+.scp-play-katuhu {
+	width:33.45%;
+	float:right;
+}
+
+.scp-play-kenca {
+	width:66.50%;
+}
+
+.scp-play {
+	cursor: pointer;
+	margin:0;
+	padding:10px;
+	display:block;
+	border-bottom: 1px solid #252525;
+	overflow:hidden;
+	*overflow:visible;
+}
+
+.scp-play span {
+	font-size: 0.8em;
+	color: #555
+}
+
+div.scp-play-top {
+	text-align: right;
+	color: #c0c0c0;
+	background:#000;
+	padding:10px 10px 10px 5px;
+	display:block;
+	overflow:hidden;
+	*overflow:visible;
+}
+
+div.scp-play-bottom {
+	color: #c0c0c0;
+	background:#111;
+	display:block;
+	overflow-y: scroll;
+	height:452px
+}
+
+div.scp-play:hover {
+	background:#333;
+}
+
+.scp-play-active {
+	background:#222;
+}
+
+iframe.scp-play-iframe {
+	width: 100%;
+	height: 500px;
+	border:0
+}
+@media only screen and (min-width: 960px) and (max-width: 1045px) {
+	.scp-play-katuhu {width:35%}
+	.scp-play-kenca {width:65%}
+}
+
+@media only screen and (min-width: 768px) and (max-width: 959px) {
+	.scp-play-katuhu {width:35%}
+	.scp-play-kenca {width:65%}
+}
+
+@media only screen and (min-width: 480px) and (max-width: 767px) {
+	.scp-play-katuhu {width:100%}
+	.scp-play-kenca {width:100%;margin-bottom:20px}
+	iframe.scp-play-iframe {height: 450px;}
+	div.scp-play-bottom{height: 385px}
+}
+
+@media screen and (max-width:479px){
+	.scp-play-katuhu{margin:0}
+	.scp-play-kenca {margin:0 0 20px 0}
+	.scp-unit{width:auto;margin-left:0;display:block;margin-top:0}
+	iframe.scp-play-iframe {height: 350px;}
+	div.scp-play-bottom{height: 285px}
+}
 		</style>
 
 	</head>
@@ -29,7 +150,53 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 
 		<!-- jQuery Soundcloud Player -->
-		<script src="scp.js"></script>
+		<script>
+var scp = function(g, f) {
+    var d = '<div class="scp-unit scp-play-kenca"><div class="scp_track_play"></div></div>';
+    d += '<div class = "scp-unit scp-play-katuhu"><div class="scp_track">';
+    d += '<div class="scp-play-top">';
+    d += '<input type="text" id="scp-input" value="dangdut koplo"/>';
+    d += '<select id="scp-select"><option value="q">Title</option><option value="tags">Tags</option><option value="user_id">Username</option></select>';
+    d += '<input type="submit" id="scp-search" value="Go"/>';
+    d += '</div><div class="scp-play-bottom">';
+    d += '</div>';
+    d += '</div></div>';
+    $('#scp').html(d);
+    scp_track('q', 'dangdut koplo');
+
+    function scp_track(c, e) {
+        $.ajax({
+            url: 'https://api.soundcloud.com/tracks?' + c + '=' + e + '&format=json&client_id=' + f,
+            crossDomain: true,
+            dataType: 'json'
+        }).done(function(b) {
+            var d = '';
+            $.each(b, function(i, a) {
+                var x = '';
+                if (i == 0) {
+                    x += 'scp-play-active'
+                }
+                d += '<div class="scp-play ' + x + '" data-play="' + b[i].id + '">' + b[i].title + '<br><span>By ' + b[i].user.username + '</span></div>'
+            });
+            $('.scp-play-bottom').html(d);
+            $('.scp_track_play').html('<iframe class="scp-play-iframe" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/' + b[0].id + '&amp;auto_play=' + g + '&amp;hide_related=true&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></iframe>');
+            $("#scp-search").click(function() {
+                scp_track($("#scp-select").val(), $("#scp-input").val());
+                return false
+            });
+            $(".scp-play").each(function() {
+                $(this).click(function() {
+                    var a = $(this).attr("data-play");
+                    $('div').removeClass('scp-play-active');
+                    $(this).addClass('scp-play-active');
+                    $('.scp_track_play').html('<iframe class="scp-play-iframe" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/' + a + '&amp;auto_play=' + g + '&amp;hide_related=true&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></iframe>');
+                    return false
+                })
+            })
+        })
+    }
+}
+		</script>
 
 		<!-- Setting -->
 		<script>
