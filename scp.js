@@ -20,7 +20,7 @@ var scp = function(g, f) {
 
     function scp_track(c, e) {
         $.ajax({
-            url: 'http://api.soundcloud.com/tracks?' + c + '=' + e + '&format=json&client_id=' + f,
+            url: 'https://api.soundcloud.com/tracks?' + c + '=' + e + '&format=json&client_id=' + f,
             crossDomain: true,
             dataType: 'json'
         }).done(function(b) {
